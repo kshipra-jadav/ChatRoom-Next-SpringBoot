@@ -7,6 +7,7 @@ export default function Home() {
   useEffect(() => {
     const name = localStorage.getItem("Client Name")
     if (!name) router.push("/login")
+    if (name) router.push("/chatroom")
   }, [])
   return (
       <>
