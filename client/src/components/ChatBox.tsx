@@ -12,7 +12,7 @@ const ChatBox: FC<ChatBoxProps> = ({ChatMessages}): JSX.Element => {
 					{
 							ChatMessages && ChatMessages.length > 0 && ChatMessages.map(message => {
 								return(
-										<div className="flex flex-row">
+										<div className="flex flex-row" key={message.timeStamp.toLocaleTimeString()}>
 											<div>
 												{message.message} -
 												&nbsp;<span className="font-bold">{message.userName}</span>

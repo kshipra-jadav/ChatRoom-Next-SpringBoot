@@ -1,9 +1,11 @@
-import { FC, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { LOCAL_STORAGE_KEY } from "@/utils/constants"
 import { useRouter } from "next/navigation"
 import ChatBox from "@/components/ChatBox"
 import { ChatMessage } from "@/types/ChatMessage"
 import { makeMessage } from "@/utils/makeMessage"
+import { Client, Message } from "stompjs"
+import { getStompClient } from "@/utils/websocket"
 
 type ChatPageProps = {
 	userName: string
@@ -13,18 +15,62 @@ const ChatPage: FC<ChatPageProps> = ({ userName }): JSX.Element => {
 	const router = useRouter()
 	const [ message, setMessage ] = useState("")
 	const [ chatMessages, setChatMessages ] = useState<ChatMessage[]>([])
+	const [ stompClient, setStompClient ] = useState<Client>()
+	const [ messageResponse, setMessageResponse ] = useState<ChatMessage>()
+	
+	// websocket utils
+	const onStompConnected = () => {
+		stompClient?.subscribe("/topic/public-chat", onMessageReceived)
+	}
+	const onStompErrored = () => {
+		console.error("Web Socket Connection Error!")
+	}
+	
+	const onMessageReceived = (response: Message) => {
+		const chatMessage: ChatMessage = JSON.parse(response.body)
+		chatMessage.timeStamp = new Date(chatMessage.timeStamp)
+		setMessageResponse(chatMessage)
+	}
+	
+	const sendMessage = (chatMessage: ChatMessage) => {
+		stompClient?.send("/chat-app/message", {}, JSON.stringify(chatMessage))
+	}
+	// websocket utils end
 	
 	const handleLogOut = () => {
 		localStorage.removeItem(LOCAL_STORAGE_KEY)
 		router.push("/login")
 	}
+	
 	const handleSendMessage = () => {
 		if (message.length > 0) {
 			const chatMessage: ChatMessage = makeMessage(userName, message)
-			setChatMessages([ chatMessage, ...chatMessages ])
+			if(stompClient?.connected) {
+				sendMessage(chatMessage)
+			}
 			setMessage("")
+			
 		}
 	}
+	
+	useEffect(() => {
+		if (!stompClient) {
+			setStompClient(getStompClient())
+		} else {
+			stompClient.debug = () => {}
+			stompClient.connect({}, onStompConnected, onStompErrored)
+		}
+	}, [stompClient])
+	
+	useEffect(() => {
+		if(messageResponse) {
+			setChatMessages([
+				messageResponse,
+				...chatMessages
+			])
+		}
+	}, [messageResponse])
+	
 	return (
 			<>
 				<div className="flex flex-col bg-emerald-200">
