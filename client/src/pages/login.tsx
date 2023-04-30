@@ -1,11 +1,7 @@
 import { FC, useEffect, useState } from 'react'
-import { Mulish } from "next/font/google"
 import { useRouter } from "next/navigation"
 
-const font = Mulish({
-	subsets: [ "latin" ],
-	weight: "300"
-})
+
 
 const Login: FC = (): JSX.Element => {
 	const [ name, setName ] = useState<string>()
@@ -28,7 +24,7 @@ const Login: FC = (): JSX.Element => {
 	}, [ name ])
 	return (
 			<>
-				<div className={ `flex flex-col w-screen h-screen bg-gray-700 items-center ${ font.className } text-white` }>
+				<div className={ `flex flex-col w-screen h-screen bg-gray-700 items-center text-white` }>
 					<div className="text-5xl font-bold p-20">
 						Login To The ChatRoom!
 					</div>
