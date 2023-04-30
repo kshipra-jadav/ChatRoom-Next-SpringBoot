@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 export default function Home() {
   const router = useRouter()
   useEffect(() => {
-    const name = localStorage.getItem("name")
+    const name = localStorage.getItem("Client Name")
     if (!name) router.push("/login")
   }, [])
   return (
